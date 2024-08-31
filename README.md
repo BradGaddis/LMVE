@@ -4,7 +4,9 @@
 
 ## Caveats:
 * Presently being designed for use in Linux Mint / Ubuntu systems.
-     Pyautogui doesn't yet have the ability to activate and close windows, so I had to roll my own solution with a wmctrl subprocess
+    >Pyautogui doesn't yet have the ability to activate and close windows, so I had to roll my own solution with a wmctrl subprocess
 
 ## Road map:
 *TBD*
+I guess the first order of operations is to just make a video first, and then figure out everything else that I need.
+
