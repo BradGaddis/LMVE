@@ -2,40 +2,35 @@ import subprocess
 
 class get_windows:
     def __init__(self):
-        pass
+        self.open_windows = self.find_all_windows_string()
 
-    def activate(self, window_title: str) -> None:
-        try:
-            # Get the list of all windows
-            windows = self.find_all_windows_string(window_title)
+    def get_windows_by_title(self, title):
+        output = []
+        for item in self.get_all_window_titles_and_ids(self.open_windows):
+            if title.lower() in item["title"].lower():
+                win_class = window(title=item["title"], id=item["id"])
+                output.append(win_class)
+        return output
 
-            for window in self.get_all_window_titles_and_ids(windows):
-                print(window)
-                
-                if window_title.lower() in window["title"].lower():
-                
-                    print(f"found it: { window["title"]}")
-                    # Activate the window
-                    subprocess.run(['wmctrl', '-i', '-a', window["id"]], check=True)
-                    # break
-
-            print(f"Window '{window_title}' not found")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
-
-
-    def find_all_windows_string(self, window_title: str) -> list:
+    def find_all_windows_string(self) -> list:
+        
+        """
+        returns a list of the full string of each window that is open, unparsed
+        """
+        
         output = subprocess.check_output(['wmctrl', '-l'])
         windows = output.decode().strip().split('\n')
         return windows
 
-
     def get_all_window_titles_and_ids(self, windows) -> list:
+        
+        """
+        returns a list of dicts of all open window titles and ids
+        """
+
         output = []
         proc = subprocess.run("hostname", stdout=subprocess.PIPE)
         host_name = proc.stdout.decode()
-
         for window in windows:
             parts = window.split(None, 4)
             parts = window.split(host_name, 4)
@@ -45,7 +40,26 @@ class get_windows:
                 output.append({"title" : title, "id": id})
         return output
 
-#for testing purposes
-if __name__ == "__main__":
-    obj = get_windows()
-    obj.activate("godot")
+class window:
+    def __init__(self, title, id):
+        self.title = title
+        self.id = id
+
+    def __repr__(self):
+        return self.title
+
+    def activate(self) -> None:
+        """
+        brings this window to the foreground
+        """
+        try:
+            subprocess.run(['wmctrl', '-i', '-a', self.id], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
+    def close(self) -> None:
+        try:
+            subprocess.run(['wmctrl', '-i', '-c', self.id], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
